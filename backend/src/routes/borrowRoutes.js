@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { borrowBook, extendBorrow, myBorrowedBooks, returnBook } from "../controllers/borrowController.js";
+import { requireAuth } from "../middlewares/auth.js";
+import { bookIdParamValidator, borrowIdParamValidator, extendValidator } from "../validation/bookValidation.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
+const router = Router();
+router.use(requireAuth);
+router.get("/me", myBorrowedBooks);
+router.post("/:bookId", bookIdParamValidator, validateRequest, borrowBook);
+router.post("/:borrowId/extend", borrowIdParamValidator, extendValidator, validateRequest, extendBorrow);
+router.post("/:borrowId/return", borrowIdParamValidator, validateRequest, returnBook);
+export default router;

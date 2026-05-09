@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BorrowStatus {
+  BORROWED
+  RETURNED
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String         @unique
+  passwordHash String
+  phone        String
+  memberId     String         @unique
+  role         UserRole       @default(USER)
+  borrows      BorrowRecord[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model Book {
+  id              Int            @id @default(autoincrement())
+  title           String
+  author          String
+  genre           String
+  description     String
+  coverImage      String
+  totalCopies     Int
+  availableCopies Int
+  borrows         BorrowRecord[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model BorrowRecord {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  bookId         Int
+  borrowDate     DateTime
+  dueDate        DateTime
+  returnDate     DateTime?
+  status         BorrowStatus @default(BORROWED)
+  extendedCount  Int          @default(0)
+  overdueDays    Int          @default(0)
+  fineAmount     Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([bookId])
+}
